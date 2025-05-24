@@ -10,66 +10,34 @@
             padding: 0;
             background: black;
             color: white;
-            font-family: 'Courier New', monospace;
             text-align: center;
         }
-        #startScreen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: black;
-        }
         #gameCanvas {
-            display: none;
+            display: block;
             background: #000;
             margin: 0 auto;
-        }
-        button {
-            font-size: 20px;
-            padding: 10px 20px;
-            margin-top: 20px;
-            cursor: pointer;
-            background: darkred;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-        button:hover {
-            background: crimson;
         }
     </style>
 </head>
 <body>
-
-<div id="startScreen">
-    <h1>Castlevania: Shadow Echo</h1>
-    <p>Press the button below to begin your journey...</p>
-    <button onclick="startGame()">Start Game</button>
-</div>
 
 <canvas id="gameCanvas" width="640" height="360"></canvas>
 
 <script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-let startScreen = document.getElementById("startScreen");
 
-function startGame() {
-    startScreen.style.display = "none";
-    canvas.style.display = "block";
-    requestAnimationFrame(loop);
-}
+const playerImg = new Image();
+playerImg.src = "alucard.png"; // Sprite
 
 let player = {
     x: 50,
     y: 280,
     width: 32,
     height: 48,
-    color: "white",
     dx: 0,
     dy: 0,
+    speed: 3,
     onGround: false
 };
 
@@ -84,8 +52,8 @@ document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
 
 function update() {
-    if (keys["ArrowRight"]) player.dx = 3;
-    else if (keys["ArrowLeft"]) player.dx = -3;
+    if (keys["ArrowRight"]) player.dx = player.speed;
+    else if (keys["ArrowLeft"]) player.dx = -player.speed;
     else player.dx *= friction;
 
     if (keys[" "] && player.onGround) {
@@ -115,13 +83,13 @@ function update() {
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = player.color;
-    ctx.fillRect(player.x, player.y, player.width, player.height);
 
-    ctx.fillStyle = "gray";
     for (let plat of platforms) {
+        ctx.fillStyle = "gray";
         ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
     }
+
+    ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
 }
 
 function loop() {
@@ -129,6 +97,10 @@ function loop() {
     draw();
     requestAnimationFrame(loop);
 }
+
+playerImg.onload = () => {
+    loop();
+};
 </script>
 
 </body>
