@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Castlevania: Shadow Echo</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            background: black;
+            color: white;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+        }
+        #startScreen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: black;
+        }
+        #gameCanvas {
+            display: none;
+            background: #000;
+            margin: 0 auto;
+        }
+        button {
+            font-size: 20px;
+            padding: 10px 20px;
+            margin-top: 20px;
+            cursor: pointer;
+            background: darkred;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: crimson;
+        }
+    </style>
+</head>
+<body>
+
+<div id="startScreen">
+    <h1>Castlevania: Shadow Echo</h1>
+    <p>Press the button below to begin your journey...</p>
+    <button onclick="startGame()">Start Game</button>
+</div>
+
+<canvas id="gameCanvas" width="640" height="360"></canvas>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+let startScreen = document.getElementById("startScreen");
+
+function startGame() {
+    startScreen.style.display = "none";
+    canvas.style.display = "block";
+    requestAnimationFrame(loop);
+}
+
+let player = {
+    x: 50,
+    y: 280,
+    width: 32,
+    height: 48,
+    color: "white",
+    dx: 0,
+    dy: 0,
+    onGround: false
+};
+
+let keys = {};
+let gravity = 0.5;
+let friction = 0.8;
+let platforms = [
+    {x: 0, y: 330, width: 640, height: 30}
+];
+
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+function update() {
+    if (keys["ArrowRight"]) player.dx = 3;
+    else if (keys["ArrowLeft"]) player.dx = -3;
+    else player.dx *= friction;
+
+    if (keys[" "] && player.onGround) {
+        player.dy = -10;
+        player.onGround = false;
+    }
+
+    player.dy += gravity;
+    player.x += player.dx;
+    player.y += player.dy;
+
+    player.onGround = false;
+    for (let plat of platforms) {
+        if (player.x < plat.x + plat.width &&
+            player.x + player.width > plat.x &&
+            player.y < plat.y + plat.height &&
+            player.y + player.height > plat.y) {
+            player.y = plat.y - player.height;
+            player.dy = 0;
+            player.onGround = true;
+        }
+    }
+
+    if (player.x < 0) player.x = 0;
+    if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = player.color;
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+
+    ctx.fillStyle = "gray";
+    for (let plat of platforms) {
+        ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
+    }
+}
+
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+</script>
+
+</body>
+</html>
